@@ -1,0 +1,30 @@
+{
+  "text.xmlyenchantip.config.save" : "Save",
+
+  "text.xmlyenchantip.tooltip.enabled" : " §aEnabled",
+  "text.xmlyenchantip.tooltip.disabled" : " §cDisabled",
+
+  "key.xmlyenchantip.title" : "Merge Enchantments",
+  "key.xmlyenchantip.enchantip_hand" : "MainHand Enchantments",
+  "key.xmlyenchantip.enchantip_offhand" : "OFFHand Enchantments",
+  "key.xmlyenchantip.enchantip_helmet" : "Helmet Enchantments",
+  "key.xmlyenchantip.enchantip_chestplate" : "Chestplate Enchantments",
+  "key.xmlyenchantip.enchantip_leggings" : "Leggings Enchantments",
+  "key.xmlyenchantip.enchantip_boots" : "Boots Enchantments",
+
+  "screen.xmlyenchantip.enchantip" : "enchantip",
+  "screen.xmlyenchantip.hand_enchantip" : "hand_enchantip",
+  "screen.xmlyenchantip.offhand_enchantip" : "offhand_enchantip",
+  "screen.xmlyenchantip.helmet_enchantip" : "helmet_enchantip",
+  "screen.xmlyenchantip.chestplate_enchantip" : "chestplate_enchantip",
+  "screen.xmlyenchantip.leggings_enchantip" : "leggings_enchantip",
+  "screen.xmlyenchantip.boots_enchantip" : "boots_enchantip",
+
+  "text.xmlyenchantip.slot.none": "None",
+  "text.xmlyenchantip.slot.hand": "MainHand",
+  "text.xmlyenchantip.slot.helmet": "Helmet",
+  "text.xmlyenchantip.slot.chestplate": "Chestplate",
+  "text.xmlyenchantip.slot.leggings": "Leggings",
+  "text.xmlyenchantip.slot.boots": "Boots",
+  "text.xmlyenchantip.slot.armor": "Armor"
+}

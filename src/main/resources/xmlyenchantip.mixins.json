@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.xmly.enchantip.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "xmlyenchantip.refmap.json",
+  "mixins": [
+    "MixItem",
+    "MixItemStack",
+    "MixPlayerInventory"
+  ],
+  "injectors": {
+    "defaultRequire": 1 }
+}

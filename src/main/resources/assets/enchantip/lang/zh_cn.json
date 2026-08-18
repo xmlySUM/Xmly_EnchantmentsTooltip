@@ -1,0 +1,30 @@
+{
+  "text.xmlyenchantip.config.save" : "保存",
+
+  "text.xmlyenchantip.tooltip.enabled" : " §a已启用",
+  "text.xmlyenchantip.tooltip.disabled" : " §c已禁用",
+
+  "key.xmlyenchantip.title" : "附魔开关",
+  "key.xmlyenchantip.enchantip_hand" : "切换主手附魔状态",
+  "key.xmlyenchantip.enchantip_offhand" : "切换副手附魔状态",
+  "key.xmlyenchantip.enchantip_helmet" : "切换头盔附魔状态",
+  "key.xmlyenchantip.enchantip_chestplate" : "切换胸甲附魔状态",
+  "key.xmlyenchantip.enchantip_leggings" : "切换护腿附魔状态",
+  "key.xmlyenchantip.enchantip_boots" : "切换靴子附魔状态",
+
+  "screen.xmlyenchantip.enchantip" : "附魔开关",
+  "screen.xmlyenchantip.hand_enchantip" : "切换主手附魔状态",
+  "screen.xmlyenchantip.offhand_enchantip" : "切换副手附魔状态",
+  "screen.xmlyenchantip.helmet_enchantip" : "切换头盔附魔状态",
+  "screen.xmlyenchantip.chestplate_enchantip" : "切换胸甲附魔状态",
+  "screen.xmlyenchantip.leggings_enchantip" : "切换护腿附魔状态",
+  "screen.xmlyenchantip.boots_enchantip" : "切换靴子附魔状态",
+
+  "text.xmlyenchantip.slot.none": "不配置",
+  "text.xmlyenchantip.slot.hand": "主手",
+  "text.xmlyenchantip.slot.helmet": "头盔",
+  "text.xmlyenchantip.slot.chestplate": "胸甲",
+  "text.xmlyenchantip.slot.leggings": "护腿",
+  "text.xmlyenchantip.slot.boots": "靴子",
+  "text.xmlyenchantip.slot.armor": "盔甲"
+}
