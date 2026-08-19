@@ -11,20 +11,28 @@ public class ConfigEventHandler {
     @SubscribeEvent
     public static void onLoad(ModConfigEvent.Loading event) {
 
-        Xmly_EnchantmentsTooltip.LOGGER.info(
-                "Loading config: {}",
-                event.getConfig().getFileName()
-        );
-        HandlerConfig.reloadFromFile();
+        if (event.getConfig().getSpec() != HandlerConfig.SPEC) {
+            return;
+        }
+
+//        Xmly_EnchantmentsTooltip.LOGGER.info(
+//                "Loading config: {}",
+//                event.getConfig().getFileName()
+//        );
+        HandlerConfig.load();
     }
 
     @SubscribeEvent
     public static void onReload(ModConfigEvent.Reloading event) {
 
-        Xmly_EnchantmentsTooltip.LOGGER.info(
-                "Reload config: {}",
-                event.getConfig().getFileName()
-        );
+        if (event.getConfig().getSpec() != HandlerConfig.SPEC) {
+            return;
+        }
+
+//        Xmly_EnchantmentsTooltip.LOGGER.info(
+//                "Reload config: {}",
+//                event.getConfig().getFileName()
+//        );
         HandlerConfig.reloadFromFile();
     }
 }

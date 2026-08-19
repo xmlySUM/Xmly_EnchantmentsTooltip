@@ -23,8 +23,9 @@ public class ServerNetworking {
     public static SimpleChannel instance;
 
     public static void init() {
+        final String PROTOCOL_VER = "1.0.1";
 
-        SimpleChannel net = NetworkRegistry.ChannelBuilder.named(new ResourceLocation(Xmly_EnchantmentsTooltip.MOD_ID, "network")).networkProtocolVersion(() -> "1.0").clientAcceptedVersions(s -> true).serverAcceptedVersions(s -> true).simpleChannel();
+        SimpleChannel net = NetworkRegistry.ChannelBuilder.named(new ResourceLocation(Xmly_EnchantmentsTooltip.MOD_ID, "network")).networkProtocolVersion(() -> PROTOCOL_VER).clientAcceptedVersions(PROTOCOL_VER::equals).serverAcceptedVersions(PROTOCOL_VER::equals).simpleChannel();
 
         instance = net;
 

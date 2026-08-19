@@ -1,0 +1,7 @@
+Xmly's Enchantments Tooltip Changelog
+1.0
+====
+ - 1.0.1   修复：配置文件读写异常
+           修复：按钮超出屏幕异常渲染，并修正排序方式
+           更新：当服务端配置is_enable_tooltip为false时，恢复附魔后自动合并附魔等级
+ - 1.0     First Release

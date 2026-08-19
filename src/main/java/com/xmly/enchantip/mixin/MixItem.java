@@ -62,7 +62,7 @@ public class MixItem {
 
             for (DisplayEnchant enchant : displayList) {
                 ResourceLocation id = enchant.id;
-                String enchantColor = "";
+                String enchantColor;
 
                 if (id == null) continue;
 
@@ -84,11 +84,16 @@ public class MixItem {
                     }
                 } else { // ========== 禁用附魔规则：不管配置是什么，一律显示 ==========
                     enchantColor = HandlerConfig.EnchantipHand.get(id);
-                    if (enchantColor == null || enchantColor.isBlank()) HandlerConfig.EnchantipHelmet.get(id);
-                    if (enchantColor == null || enchantColor.isBlank()) HandlerConfig.EnchantipChestplate.get(id);
-                    if (enchantColor == null || enchantColor.isBlank()) HandlerConfig.EnchantipLeggings.get(id);
-                    if (enchantColor == null || enchantColor.isBlank()) HandlerConfig.EnchantipBoots.get(id);
-                    if (enchantColor == null || enchantColor.isBlank()) HandlerConfig.EnchantipArmor.get(id);
+                    if (enchantColor == null || enchantColor.isBlank())
+                        enchantColor = HandlerConfig.EnchantipHelmet.get(id);
+                    if (enchantColor == null || enchantColor.isBlank())
+                        enchantColor = HandlerConfig.EnchantipChestplate.get(id);
+                    if (enchantColor == null || enchantColor.isBlank())
+                        enchantColor = HandlerConfig.EnchantipLeggings.get(id);
+                    if (enchantColor == null || enchantColor.isBlank())
+                        enchantColor = HandlerConfig.EnchantipBoots.get(id);
+                    if (enchantColor == null || enchantColor.isBlank())
+                        enchantColor = HandlerConfig.EnchantipArmor.get(id);
                     if (enchantColor == null || enchantColor.isBlank()) { // 禁用附魔没有存颜色，给默认白色
                         enchantColor = "FFFFFF";
                     }

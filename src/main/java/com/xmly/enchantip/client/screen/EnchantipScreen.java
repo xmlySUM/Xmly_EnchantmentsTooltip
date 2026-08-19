@@ -61,20 +61,16 @@ public class EnchantipScreen extends Screen {
     protected void init() {
         super.init();
         enchantButtons.clear();
+        buttonTexts.clear();
         scrollY = 0;
         viewBottom = this.height - 40;
-
-        // 排序切换按钮 右上角
-        sortBtn = Button.builder(Component.literal("排序: ").append(currentSort.getName()), btn -> {
-            // 左键：下一个排序
-            nextSortMode();
-        }).bounds(this.width - 140, 20, 130, 20).build();
+        // 清除上一次 GUI 的缓存
+        PacketSyncEnchantList.enchantments.clear();
+        sortBtn = Button.builder(Component.literal("排序: ").append(currentSort.getName()), btn -> nextSortMode()).bounds(this.width - 140, 20, 130, 20).build();
         sortBtn.setTooltip(Tooltip.create(Component.literal("左键下一种 / 右键上一种")));
         addRenderableWidget(sortBtn);
-
-        // 打开GUI时请求服务器同步
+        // 等服务器返回新列表后再创建附魔按钮
         ServerNetworking.sendToServer(new PacketRequestEnchantList(type));
-        refreshEnchantButtons();
     }
 
     // 安全刷新按钮
@@ -87,6 +83,9 @@ public class EnchantipScreen extends Screen {
         buttonTexts.clear();
 
         List<PacketSyncEnchantList.Entry> list = new ArrayList<>(PacketSyncEnchantList.enchantments);
+        if (list.isEmpty()) {
+            return;
+        }
         // 根据排序模式过滤+排序
         switch (currentSort) {
             case ONLY_ENABLE:
@@ -96,13 +95,21 @@ public class EnchantipScreen extends Screen {
                 list = list.stream().filter(e -> !e.enabled()).collect(Collectors.toList());
                 break;
             case BY_ID:
-                list.sort(Comparator.comparing(e -> e.id().toString()));
+                list.sort((a, b) -> {
+                    int cmpId = a.id().toString().compareTo(b.id().toString());
+                    if (cmpId != 0) return cmpId;
+                    // id相同，等级降序
+                    return Integer.compare(b.level(), a.level());
+                });
                 break;
             case BY_NAME:
                 list.sort((a, b) -> {
                     String nameA = Minecraft.getInstance().font.getSplitter().splitLines(Component.translatable("enchantment." + a.id().getNamespace() + "." + a.id().getPath()), 1000, Style.EMPTY).get(0).getString();
                     String nameB = Minecraft.getInstance().font.getSplitter().splitLines(Component.translatable("enchantment." + b.id().getNamespace() + "." + b.id().getPath()), 1000, Style.EMPTY).get(0).getString();
-                    return nameA.compareTo(nameB);
+                    int cmpName = nameA.compareTo(nameB);
+                    if (cmpName != 0) return cmpName;
+                    // 名称相同，等级降序
+                    return Integer.compare(b.level(), a.level());
                 });
                 break;
             case DEFAULT:
@@ -150,7 +157,7 @@ public class EnchantipScreen extends Screen {
     }
 
     private void enchantip(PacketSyncEnchantList.Entry entry) {
-        ServerNetworking.sendToServer(new PacketTipSpecificEnchant(entry.slot(), type, entry.id()));
+        ServerNetworking.sendToServer(new PacketTipSpecificEnchant(entry.slot(), type, entry.id(), (short) entry.level(), entry.enabled()));
     }
 
     @Override
@@ -165,15 +172,20 @@ public class EnchantipScreen extends Screen {
 
         for (Button btn : enchantButtons) {
             btn.setY(yOffset);
-            // 自定义绘制按钮文字：左对齐
-            btn.render(graphics, mouseX, mouseY, partialTick);
-            // BUTTON_HEIGHT=24，字体默认高度约9，垂直居中公式：y + (按钮高度-字体高度)/2
-            graphics.drawString(font, buttonTexts.get(btn), baseX + 6, yOffset + (BUTTON_HEIGHT - font.lineHeight) / 2, 0xffffff);
+            boolean visible = yOffset + BUTTON_HEIGHT > VIEW_TOP && yOffset < viewBottom;
+            btn.visible = visible;
+            btn.active = visible;
+            if (visible) {
+                // 自定义绘制按钮文字：左对齐
+                btn.render(graphics, mouseX, mouseY, partialTick);
+                // BUTTON_HEIGHT=24，字体默认高度约9，垂直居中公式：y + (按钮高度-字体高度)/2
+                graphics.drawString(font, buttonTexts.get(btn), baseX + 6, yOffset + (BUTTON_HEIGHT - font.lineHeight) / 2, 0xffffff);
+            }
             yOffset += BUTTON_HEIGHT;
         }
         graphics.disableScissor();
 
-        super.render(graphics, mouseX, mouseY, partialTick);
+        sortBtn.render(graphics, mouseX, mouseY, partialTick);
     }
 
     // 鼠标滚轮滚动
@@ -183,7 +195,7 @@ public class EnchantipScreen extends Screen {
         int visibleHeight = viewBottom - VIEW_TOP;
         if (totalHeight > visibleHeight) {
             double maxScroll = totalHeight - visibleHeight;
-            scrollY += scrollDelta * 8;
+            scrollY -= scrollDelta * 8;
             scrollY = Math.max(0, Math.min(scrollY, maxScroll));
         }
         return true;
@@ -195,6 +207,9 @@ public class EnchantipScreen extends Screen {
         if (button == 1 && sortBtn.isMouseOver(mouseX, mouseY)) {
             prevSortMode();
             return true;
+        }
+        if (mouseY < VIEW_TOP || mouseY >= viewBottom) {
+            return super.mouseClicked(mouseX, mouseY, button);
         }
         return super.mouseClicked(mouseX, mouseY, button);
     }
@@ -228,6 +243,19 @@ public class EnchantipScreen extends Screen {
     }
 
     public void reloadButtons() {
+        if (PacketSyncEnchantList.enchantments.isEmpty()) {
+            Minecraft mc = Minecraft.getInstance();
+
+            if (mc.player != null) {
+                mc.player.displayClientMessage(
+                        Component.literal("没有有效附魔"),
+                        true
+                );
+            }
+
+            mc.setScreen(null);
+            return;
+        }
         refreshEnchantButtons();
     }
 }

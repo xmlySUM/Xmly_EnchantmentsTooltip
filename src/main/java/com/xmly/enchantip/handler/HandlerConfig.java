@@ -61,7 +61,7 @@ public class HandlerConfig {
         SPEC = CONFIG.build();
 
         // 初始化解析一次
-        load();
+//放到事件执行        load();
     }
 
     public static Map<ResourceLocation, String> parseEnchantments(List<?> list) {
@@ -149,20 +149,28 @@ public class HandlerConfig {
         try (CommentedFileConfig config = CommentedFileConfig.builder(path).autosave().build()) {
             config.load();
 
-            enchantip_tooltip.set(config.getOrElse("general.enable_tooltip", true));
+            boolean newTooltip = config.getOrElse("general.enable_tooltip", true);
+            Map<ResourceLocation, String> newHand = parseEnchantments(config.getOrElse("general.enchantip_hand", List.of()));
+            Map<ResourceLocation, String> newHelmet = parseEnchantments(config.getOrElse("general.enchantip_helmet", List.of()));
+            Map<ResourceLocation, String> newChestplate = parseEnchantments(config.getOrElse("general.enchantip_chestplate", List.of()));
+            Map<ResourceLocation, String> newLeggings = parseEnchantments(config.getOrElse("general.enchantip_leggings", List.of()));
+            Map<ResourceLocation, String> newBoots = parseEnchantments(config.getOrElse("general.enchantip_boots", List.of()));
+            Map<ResourceLocation, String> newArmor = parseEnchantments(config.getOrElse("general.enchantip_armor", List.of()));
 
+            /* 所有配置都成功读取后，一次性替换运行时状态。 */
+            enchantip_tooltip.set(newTooltip);
             EnchantipHand.clear();
-            EnchantipHand.putAll(parseEnchantments(config.getOrElse("general.enchantip_hand", List.of())));
+            EnchantipHand.putAll(newHand);
             EnchantipHelmet.clear();
-            EnchantipHelmet.putAll(parseEnchantments(config.getOrElse("general.enchantip_helmet", List.of())));
+            EnchantipHelmet.putAll(newHelmet);
             EnchantipChestplate.clear();
-            EnchantipChestplate.putAll(parseEnchantments(config.getOrElse("general.enchantip_chestplate", List.of())));
+            EnchantipChestplate.putAll(newChestplate);
             EnchantipLeggings.clear();
-            EnchantipLeggings.putAll(parseEnchantments(config.getOrElse("general.enchantip_leggings", List.of())));
+            EnchantipLeggings.putAll(newLeggings);
             EnchantipBoots.clear();
-            EnchantipBoots.putAll(parseEnchantments(config.getOrElse("general.enchantip_boots", List.of())));
+            EnchantipBoots.putAll(newBoots);
             EnchantipArmor.clear();
-            EnchantipArmor.putAll(parseEnchantments(config.getOrElse("general.enchantip_armor", List.of())));
+            EnchantipArmor.putAll(newArmor);
 
             return true;
         } catch (Exception e) {

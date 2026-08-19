@@ -7,7 +7,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
-import org.slf4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @Mod(Xmly_EnchantmentsTooltip.MOD_ID)
 public class Xmly_EnchantmentsTooltip {
@@ -18,7 +19,7 @@ public class Xmly_EnchantmentsTooltip {
 
     public static final ResourceLocation DISABLED_ENCHANT = new ResourceLocation(Xmly_EnchantmentsTooltip.MOD_ID, "disable");
 
-    public static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(MOD_ID);
+    public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 
     public Xmly_EnchantmentsTooltip() {
         ServerNetworking.init();

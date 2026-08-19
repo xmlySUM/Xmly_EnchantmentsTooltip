@@ -115,9 +115,10 @@ public class EnchantConfigScreen extends Screen {
         addRenderableWidget(searchBox);
 
         Button tooltipButton = Button.builder(Component.literal("Tooltip: " + (enableTooltip ? "§aON" : "§cOFF")), b -> {
-            enableTooltip = !enableTooltip;
-            b.setMessage(Component.literal("Tooltip: " + (enableTooltip ? "§aON" : "§cOFF")));
-        }).bounds(width / 2 - 250, height - 35, 70, 20).build();
+                    enableTooltip = !enableTooltip;
+                    b.setMessage(Component.literal("Tooltip: " + (enableTooltip ? "§aON" : "§cOFF")));
+                }).tooltip(Tooltip.create(Component.literal("ON: \n客户端功能，显示附魔启用状态Tooltip\n\nOFF: \n服务端功能：恢复附魔时自动合并等级")))
+                .bounds(width / 2 - 250, height - 35, 70, 20).build();
         addRenderableWidget(tooltipButton);
 
         Button saveButton = Button.builder(Component.translatable("text.xmlyenchantip.config.save"), b -> save()).bounds(width / 2 - 50, height - 35, 100, 20).build();
