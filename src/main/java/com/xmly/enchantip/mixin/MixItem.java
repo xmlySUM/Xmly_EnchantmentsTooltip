@@ -103,6 +103,7 @@ public class MixItem {
                 if (enchantColor == null) continue;
 
                 Component name = Component.translatable("enchantment." + id.toLanguageKey());
+                Component nameWithLv = name.copy().append(Component.literal(String.format(" Lv.%d", enchant.level)).setStyle(Style.EMPTY.withColor(0xFFFFFF)));
 
                 int color = 0xFFFFFF;
                 try {
@@ -112,9 +113,9 @@ public class MixItem {
                 Style style = Style.EMPTY.withColor(TextColor.fromRgb(color));
 
                 if (enchant.enabled) {
-                    p_41423_.add(name.copy().setStyle(style).append(Component.translatable("text.xmlyenchantip.tooltip.enabled")));
+                    p_41423_.add(nameWithLv.copy().setStyle(style).append(Component.translatable("text.xmlyenchantip.tooltip.enabled")));
                 } else {
-                    p_41423_.add(name.copy().setStyle(style).append(Component.translatable("text.xmlyenchantip.tooltip.disabled")));
+                    p_41423_.add(nameWithLv.copy().setStyle(style).append(Component.translatable("text.xmlyenchantip.tooltip.disabled")));
                 }
             }
         }

@@ -108,8 +108,8 @@ public class EnchantipScreen extends Screen {
                     String nameB = Minecraft.getInstance().font.getSplitter().splitLines(Component.translatable("enchantment." + b.id().getNamespace() + "." + b.id().getPath()), 1000, Style.EMPTY).get(0).getString();
                     int cmpName = nameA.compareTo(nameB);
                     if (cmpName != 0) return cmpName;
-                    // 名称相同，等级降序
-                    return Integer.compare(b.level(), a.level());
+                    // 名称相同，等级升序
+                    return Integer.compare(a.level(), b.level());
                 });
                 break;
             case DEFAULT:
@@ -207,9 +207,6 @@ public class EnchantipScreen extends Screen {
         if (button == 1 && sortBtn.isMouseOver(mouseX, mouseY)) {
             prevSortMode();
             return true;
-        }
-        if (mouseY < VIEW_TOP || mouseY >= viewBottom) {
-            return super.mouseClicked(mouseX, mouseY, button);
         }
         return super.mouseClicked(mouseX, mouseY, button);
     }

@@ -157,16 +157,7 @@ public class PacketTipSpecificEnchant {
             sendMessage(player, enchantId, type, "disabled");
             return;
         }
-        /*
-         * 找不到指定等级。
-         *
-         * 这是为了兼容：
-         * - 客户端数据已经过时
-         * - 附魔等级发生变化
-         * - 某些其它模组修改了 ItemStack
-         *
-         * 按你的设计，找不到时取最前面的同 ID 附魔。
-         */
+
         for (int i = 0; i < enchantList.size(); i++) {
             CompoundTag tag = enchantList.getCompound(i);
             ResourceLocation id = ResourceLocation.tryParse(tag.getString("id"));
@@ -175,14 +166,14 @@ public class PacketTipSpecificEnchant {
             }
             short lvl = tag.getShort("lvl");
             CompoundTag save = new CompoundTag();
-            save.putInt("index", i);
             save.putString("id", enchantId.toString());
             save.putShort("lvl", lvl);
+            save.putInt("index", i);
             enchantipList.add(save);
             tag.putString("id", Xmly_EnchantmentsTooltip.DISABLED_ENCHANT.toString());
             tag.putShort("lvl", (short) 0);
             if (shouldMergeEnchantments()) {
-                mergeEnchant(stack, enchantId, false);
+                mergeEnchant(stack, enchantId, false, -1);
             }
             sendMessage(player, enchantId, type, "disabled");
             return;
@@ -192,10 +183,7 @@ public class PacketTipSpecificEnchant {
     private static void enableEnchant(ServerPlayer player, ItemStack stack, ResourceLocation enchantId, short targetLvl, TipType type, ListTag enchantList, ListTag enchantipList) {
         int bestEntry = -1;
         int bestIndex = Integer.MAX_VALUE;
-        /*
-         * 第一轮：
-         * 找 id + lvl 匹配的、index 仍然对应 DISABLED_ENCHANT 的记录。
-         */
+
         for (int i = 0; i < enchantipList.size(); i++) {
             CompoundTag saved = enchantipList.getCompound(i);
             if (!enchantId.toString().equals(saved.getString("id"))) {
@@ -218,43 +206,59 @@ public class PacketTipSpecificEnchant {
                 bestEntry = i;
             }
         }
-        /*
-         * 第二轮：
-         * 如果指定等级找不到，则按照最前面的同 ID 禁用附魔。
-         */
+
         if (bestEntry == -1) {
-            bestIndex = Integer.MAX_VALUE;
+            int targetEntryLvl = -1;
+            int targetEntry = -1;
             for (int i = 0; i < enchantipList.size(); i++) {
                 CompoundTag saved = enchantipList.getCompound(i);
                 if (!enchantId.toString().equals(saved.getString("id"))) {
                     continue;
                 }
-                int index = saved.getInt("index");
-                if (index < 0 || index >= enchantList.size()) {
-                    continue;
+                if (saved.getShort("lvl") == targetLvl) {
+                    targetEntryLvl = i;
                 }
-                CompoundTag current = enchantList.getCompound(index);
-                ResourceLocation currentId = ResourceLocation.tryParse(current.getString("id"));
-                if (!Xmly_EnchantmentsTooltip.DISABLED_ENCHANT.equals(currentId)) {
-                    continue;
-                }
-                if (index < bestIndex) {
-                    bestIndex = index;
-                    bestEntry = i;
+                targetEntry = i;
+                break;
+            }
+
+            if (targetEntry != -1) {
+                for (int i = 0; i < enchantList.size(); i++) {
+                    CompoundTag current = enchantList.getCompound(i);
+                    ResourceLocation currentId = ResourceLocation.tryParse(current.getString("id"));
+                    if (Xmly_EnchantmentsTooltip.DISABLED_ENCHANT.equals(currentId)) {
+                        bestEntry = targetEntryLvl != -1 ? targetEntryLvl : targetEntry;
+                        break;
+                    }
                 }
             }
         }
-        /*
-         * 没有可启用的附魔
-         */
+
         if (bestEntry == -1) {
+            for (int i = 0; i < enchantipList.size(); i++) {
+                CompoundTag saved = enchantipList.getCompound(i);
+                if (enchantId.toString().equals(saved.getString("id"))) {
+                    enchantipList.remove(i);
+                    break;
+                }
+            }
+            CompoundTag enchant = new CompoundTag();
+            enchant.putString("id", enchantId.toString());
+            enchant.putShort("lvl", targetLvl);
+            enchantList.add(enchant);
+            if (shouldMergeEnchantments()) {
+                mergeEnchant(stack, enchantId, true, enchantList.size() - 1);
+            }
+            sendMessage(player, enchantId, type, "enabled");
             return;
         }
+
         CompoundTag saved = enchantipList.getCompound(bestEntry);
+        int originalIndex = saved.getInt("index");
         restoreDisableEnchant(stack, saved);
         enchantipList.remove(bestEntry);
         if (shouldMergeEnchantments()) {
-            mergeEnchant(stack, enchantId, true);
+            mergeEnchant(stack, enchantId, true, originalIndex);
         }
         sendMessage(player, enchantId, type, "enabled");
     }
@@ -262,9 +266,6 @@ public class PacketTipSpecificEnchant {
     private static void restoreDisableEnchant(ItemStack stack, CompoundTag saved) {
         ListTag list = stack.getEnchantmentTags();
         int index = saved.getInt("index");
-        /*
-         * 第一优先：原位置
-         */
         if (index >= 0 && index < list.size()) {
             CompoundTag tag = list.getCompound(index);
             ResourceLocation currentId = ResourceLocation.tryParse(tag.getString("id"));
@@ -274,10 +275,6 @@ public class PacketTipSpecificEnchant {
                 return;
             }
         }
-        /*
-         * 原位置失效：
-         * 不删除其他 disabled，只追加恢复。
-         */
         int newIndex = list.size();
         CompoundTag restore = new CompoundTag();
         restore.putString("id", saved.getString("id"));
@@ -286,123 +283,78 @@ public class PacketTipSpecificEnchant {
         saved.putInt("index", newIndex);
     }
 
-    private static void mergeEnchant(ItemStack stack, ResourceLocation enchantId, boolean enabled) {
+    private static void mergeEnchant(ItemStack stack, ResourceLocation enchantId, boolean enabled, int preferredIndex) {
         ListTag enchantList = stack.getEnchantmentTags();
         CompoundTag root = stack.getOrCreateTag();
         ListTag enchantipList = root.getList(NBT_NAME, Tag.TAG_COMPOUND);
-
         List<Integer> levels = new ArrayList<>();
-
         // 合并前记录最靠前的位置
-        int firstIndex = Integer.MAX_VALUE;
-
-        /*
-         * 收集正常附魔
-         */
+        int firstIndex = preferredIndex >= 0 ? preferredIndex : Integer.MAX_VALUE;
         for (int i = 0; i < enchantList.size(); i++) {
             CompoundTag tag = enchantList.getCompound(i);
-
             ResourceLocation id = ResourceLocation.tryParse(tag.getString("id"));
-
             if (!enchantId.equals(id)) {
                 continue;
             }
-
             levels.add(tag.getInt("lvl"));
-
-            // 记录最前的正常附魔位置
-            firstIndex = Math.min(firstIndex, i);
+            if (preferredIndex < 0) {
+                firstIndex = Math.min(firstIndex, i);
+            }
         }
-
-        /*
-         * 收集禁用附魔
-         */
         for (int i = 0; i < enchantipList.size(); i++) {
             CompoundTag tag = enchantipList.getCompound(i);
-
             if (!enchantId.toString().equals(tag.getString("id"))) {
                 continue;
             }
-
             levels.add(tag.getInt("lvl"));
-
-            /*
-             * disabled 保存的 index 是原 enchantList 中的位置，
-             * 因此也要参与 firstIndex 的比较。
-             */
             int index = tag.getInt("index");
-
-            if (index >= 0) {
+            if (index >= 0 && preferredIndex < 0) {
                 firstIndex = Math.min(firstIndex, index);
             }
         }
-
         if (levels.isEmpty()) {
             return;
         }
 
-        /*
-         * 合并等级
-         */
         int mergedLevel = mergeEnchantLevels(levels);
-
-        /*
-         * 删除所有同 ID 的正常附魔
-         */
-        for (int i = enchantList.size() - 1; i >= 0; i--) {
+        for (
+                int i = enchantList.size() - 1;
+                i >= 0; i--) {
             CompoundTag tag = enchantList.getCompound(i);
-
             ResourceLocation id = ResourceLocation.tryParse(tag.getString("id"));
-
-            if (enchantId.equals(id)) {
+            if (enchantId.equals(id) || Xmly_EnchantmentsTooltip.DISABLED_ENCHANT.equals(id)) {
                 enchantList.remove(i);
             }
         }
-
-        /*
-         * 删除所有同 ID 的禁用记录
-         */
-        for (int i = enchantipList.size() - 1; i >= 0; i--) {
+        for (
+                int i = enchantipList.size() - 1;
+                i >= 0; i--) {
             CompoundTag tag = enchantipList.getCompound(i);
-
             if (enchantId.toString().equals(tag.getString("id"))) {
                 enchantipList.remove(i);
             }
         }
-
-        /*
-         * 如果之前完全没有有效 index，
-         * 才退化到末尾。
-         */
         if (firstIndex == Integer.MAX_VALUE) {
             firstIndex = enchantList.size();
         }
 
-        /*
-         * 启用状态：
-         * 恢复为正常附魔，并放回最前的原位置。
-         */
+        firstIndex = Math.min(firstIndex, enchantList.size());
+
         if (enabled) {
             CompoundTag enchant = new CompoundTag();
             enchant.putString("id", enchantId.toString());
             enchant.putInt("lvl", mergedLevel);
-
-            int insertIndex = Math.min(firstIndex, enchantList.size());
-            enchantList.add(insertIndex, enchant);
-
+            enchantList.add(firstIndex, enchant);
         } else {
-            /*
-             * 禁用状态：
-             * 正常 enchantList 中没有该附魔，
-             * 所以只在 enchantipList 中保存。
-             */
             CompoundTag disabled = new CompoundTag();
-
-            disabled.putInt("index", firstIndex);
             disabled.putString("id", enchantId.toString());
             disabled.putInt("lvl", mergedLevel);
-
+            disabled.putInt("index", firstIndex);
             enchantipList.add(disabled);
+            CompoundTag placeholder = new CompoundTag();
+            placeholder.putString("id", Xmly_EnchantmentsTooltip.DISABLED_ENCHANT.toString());
+            placeholder.putInt("lvl", 0);
+            enchantList.add(firstIndex, placeholder);
         }
     }
 

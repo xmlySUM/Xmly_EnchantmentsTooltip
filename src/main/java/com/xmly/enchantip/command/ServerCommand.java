@@ -31,7 +31,7 @@ public class ServerCommand {
                 )
                 .then(Commands.literal("print")
                         .executes(ctx -> {
-                            for (String line : HandlerConfig.getConfigText("\nServer Config:").split("\n")) {
+                            for (String line : HandlerConfig.getConfigText("\nServer Config:\n不合并附魔等级: ").split("\n")) {
                                 ctx.getSource().sendSuccess(() ->
                                         Component.literal(line), true
                                 );
@@ -41,5 +41,4 @@ public class ServerCommand {
                 )
         );
     }
-
 }

@@ -94,7 +94,7 @@ public class HandlerConfig {
 
     public static String getConfigText(String title) {
         StringBuilder sb = new StringBuilder();
-        sb.append(title).append("\n");
+        sb.append(title).append(enchantip_tooltip.get()).append("\n");
 
         append(sb, "主手", EnchantipHand);
         append(sb, "头盔", EnchantipHelmet);
@@ -149,7 +149,7 @@ public class HandlerConfig {
         try (CommentedFileConfig config = CommentedFileConfig.builder(path).autosave().build()) {
             config.load();
 
-            boolean newTooltip = config.getOrElse("general.enable_tooltip", true);
+            boolean newTooltip = config.getOrElse("general.is_enable_tooltip", true);
             Map<ResourceLocation, String> newHand = parseEnchantments(config.getOrElse("general.enchantip_hand", List.of()));
             Map<ResourceLocation, String> newHelmet = parseEnchantments(config.getOrElse("general.enchantip_helmet", List.of()));
             Map<ResourceLocation, String> newChestplate = parseEnchantments(config.getOrElse("general.enchantip_chestplate", List.of()));

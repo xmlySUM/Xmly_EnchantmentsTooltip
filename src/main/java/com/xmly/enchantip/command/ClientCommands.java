@@ -33,7 +33,7 @@ public class ClientCommands {
                         .then(Commands.literal("print")
                                 .executes(ctx -> {
                                     Minecraft mc = Minecraft.getInstance();
-                                    for (String line : HandlerConfig.getConfigText("\nClient Config:").split("\n")) {
+                                    for (String line : HandlerConfig.getConfigText("\nClient Config:\n附魔ToolTip: ").split("\n")) {
                                         mc.gui.getChat().addMessage(Component.literal(line));
                                     }
                                     return 1;
