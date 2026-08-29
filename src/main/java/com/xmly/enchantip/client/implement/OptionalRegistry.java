@@ -22,13 +22,25 @@ public class OptionalRegistry {
     public void getTooltip() {
         for (int i = 0; i < tags.size(); i++) {
             CompoundTag nbt = tags.getCompound(i);
-            ResourceLocation id = ResourceLocation.tryParse(nbt.getString("id"));
-
-            if (id == null) continue;
-
-            if (id.equals(Xmly_EnchantmentsTooltip.DISABLED_ENCHANT)) continue;
-
-            list.add(Objects.requireNonNull(ForgeRegistries.ENCHANTMENTS.getValue(id)).getFullname(nbt.getInt("lvl")));
+            String idString = nbt.getString("id");
+            if (idString == null || idString.isBlank()) {
+                continue;
+            }
+            ResourceLocation id = ResourceLocation.tryParse(idString);
+            if (id == null) {
+                Xmly_EnchantmentsTooltip.LOGGER.warn("Skipping invalid enchantment ID: {}", idString);
+                continue;
+            }
+            // Enchantip disabled placeholder
+            if (Xmly_EnchantmentsTooltip.DISABLED_ENCHANT.equals(id)) {
+                continue;
+            }
+            var enchantment = ForgeRegistries.ENCHANTMENTS.getValue(id);
+            if (enchantment == null) {
+                Xmly_EnchantmentsTooltip.LOGGER.warn("Skipping unregistered enchantment: {}", id);
+                continue;
+            }
+            list.add(enchantment.getFullname(nbt.getInt("lvl")));
         }
     }
 }

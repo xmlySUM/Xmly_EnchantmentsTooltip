@@ -4,7 +4,7 @@ license="MIT license"
 issueTrackerURL="https://github.com/xmlySUM/Xmly_EnchantmentsTooltip"
 [[mods]]
 modId="xmlyenchantip"
-version="1.0.1"
+version="1.0.2"
 displayName="Xmly's Enchantments Tooltip"
 authors="xmlySUM"
 description='''make a tooltip for enchantments'''
